@@ -5,9 +5,9 @@ import { useState } from "react";
 import { useCentre } from "@/components/app/CentreContext";
 import { PickCentre } from "@/components/app/PickCentre";
 import { ChildAvatar } from "@/components/app/ChildBits";
-import { attOf, ops, useOps } from "@/components/app/OpsStore";
+import { attOf, kidsOf, ops, useOps } from "@/components/app/OpsStore";
 import { PageHead } from "@/components/app/ui";
-import { childrenOf, type Child } from "@/lib/children";
+import { type Child } from "@/lib/children";
 
 type Mode = "arriving" | "leaving";
 
@@ -25,7 +25,7 @@ function Kiosk({ centreId }: { centreId: string }) {
   const [pin, setPin] = useState("");
   const [done, setDone] = useState("");
 
-  const list = childrenOf(centreId).filter((k) => attOf(o, k).status === (mode === "arriving" ? "expected" : "in"));
+  const list = kidsOf(o, centreId).filter((k) => attOf(o, k).status === (mode === "arriving" ? "expected" : "in"));
   const reset = () => { setChild(null); setWho(""); setPin(""); };
 
   const finish = (k: Child, by: string) => {

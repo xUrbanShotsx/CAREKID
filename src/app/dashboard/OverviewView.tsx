@@ -4,8 +4,7 @@ import Link from "next/link";
 import { Icon } from "@/components/Icons";
 import { useCentre } from "@/components/app/CentreContext";
 import { Card, PageHead, Pill, Stat } from "@/components/app/ui";
-import { attOf, counts, useOps } from "@/components/app/OpsStore";
-import { childrenOf } from "@/lib/children";
+import { attOf, counts, incidentsOf, kidsOf, staffOf, useOps } from "@/components/app/OpsStore";
 import { centres, me } from "@/lib/demo";
 
 export function OverviewView() {
@@ -66,13 +65,13 @@ export function OverviewView() {
     );
   }
 
-  const kids = childrenOf(centre.id);
+  const kids = kidsOf(o, centre.id);
   const here = counts(o, kids);
   const severeIn = kids.filter(
     (k) => attOf(o, k).status === "in" && k.allergies.some((a) => a.severity === "Anaphylaxis"),
   ).length;
-  const open = centre.incidents.filter((i) => i.status !== "Closed").length;
-  const expiring = centre.staff.filter((s) =>
+  const open = incidentsOf(o, centre.id).filter((i) => i.status !== "Closed").length;
+  const expiring = staffOf(o, centre.id).filter((s) =>
     [s.wwcc, s.firstAid, s.childProtection].some((d) => d <= 30),
   ).length;
   return (

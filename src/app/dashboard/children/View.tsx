@@ -5,9 +5,10 @@ import { useState } from "react";
 import { Icon } from "@/components/Icons";
 import { useCentre } from "@/components/app/CentreContext";
 import { ChildAvatar, Flags, StatusPill } from "@/components/app/ChildBits";
-import { attOf, useNow, useOps } from "@/components/app/OpsStore";
+import { ChildForm } from "@/components/app/ChildForm";
+import { attOf, kidsOf, ops, useNow, useOps } from "@/components/app/OpsStore";
 import { PageHead, Pill, Stat } from "@/components/app/ui";
-import { ageText, children, childrenOf, ROOMS } from "@/lib/children";
+import { ageText, ROOMS } from "@/lib/children";
 import { centres } from "@/lib/demo";
 
 export function View() {
@@ -18,7 +19,10 @@ export function View() {
   const [room, setRoom] = useState("All");
   const [alertsOnly, setAlertsOnly] = useState(false);
 
-  const all = centre ? childrenOf(centre.id) : children;
+  const [adding, setAdding] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const all = kidsOf(o, centre?.id, showArchived);
+  const archivedCount = kidsOf(o, centre?.id, true).length - kidsOf(o, centre?.id).length;
   const rooms = centre ? ["All", ...ROOMS[centre.id].map((r) => r.name)] : ["All"];
   const list = all.filter(
     (k) =>
@@ -35,11 +39,26 @@ export function View() {
         title="Children"
         sub={`${centre?.name ?? "All centres"}. Every child's health, behaviour, family and consent records in one place. Access is limited to the roles you choose.`}
         right={
-          <span className="inline-flex items-center gap-2 rounded-full bg-tint px-4 py-2 text-sm font-semibold text-ink-soft">
-            <Icon name="lock" className="h-4 w-4" /> Restricted access
+          <span className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-2 rounded-full bg-tint px-4 py-2 text-sm font-semibold text-ink-soft">
+              <Icon name="lock" className="h-4 w-4" /> Restricted access
+            </span>
+            <button type="button" onClick={() => setAdding((a) => !a)} className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-bg hover:bg-ink/85">
+              {adding ? "Close" : "Add child"}
+            </button>
           </span>
         }
       />
+      {adding && (
+        <ChildForm
+          centreId={centre?.id}
+          onCancel={() => setAdding(false)}
+          onSubmit={(child) => {
+            ops.addKid(child);
+            setAdding(false);
+          }}
+        />
+      )}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat value={String(all.length)} label="Children enrolled" />
         <Stat value={String(severe)} label="With anaphylaxis risk" hot={severe > 0} />
@@ -61,6 +80,11 @@ export function View() {
           <button type="button" onClick={() => setAlertsOnly((a) => !a)} aria-pressed={alertsOnly} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold ${alertsOnly ? "border-ink bg-accent" : "border-line hover:bg-tint"}`}>
             Health alerts only
           </button>
+          {archivedCount > 0 || showArchived ? (
+            <button type="button" onClick={() => setShowArchived((a) => !a)} aria-pressed={showArchived} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold ${showArchived ? "border-ink bg-tint" : "border-line hover:bg-tint"}`}>
+              {showArchived ? "Hide" : "Show"} archived
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -74,7 +98,7 @@ export function View() {
                   <span className="font-display text-lg font-extrabold leading-tight">
                     {k.first} {k.last}
                   </span>
-                  <StatusPill status={attOf(o, k).status} />
+                  {k.archived ? <Pill tone="neutral">Archived</Pill> : <StatusPill status={attOf(o, k).status} />}
                 </span>
                 <span className="mt-0.5 block text-sm text-ink-soft">
                   {ageText(k.dob, now)} · {k.room}

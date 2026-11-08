@@ -6,9 +6,9 @@ import { Icon } from "@/components/Icons";
 import { useCentre } from "@/components/app/CentreContext";
 import { PickCentre } from "@/components/app/PickCentre";
 import { Alert, ChildAvatar, Flags, StatusPill } from "@/components/app/ChildBits";
-import { attOf, counts, floorOf, notesOf, ops, useNow, useOps } from "@/components/app/OpsStore";
+import { attOf, counts, floorOf, kidsOf, notesOf, ops, useNow, useOps } from "@/components/app/OpsStore";
 import { Card, PageHead, Pill, Stat } from "@/components/app/ui";
-import { ageText, childrenOf, NOTE_CATS, ROOMS, type Child, type NoteCat } from "@/lib/children";
+import { ageText, NOTE_CATS, ROOMS, type Child, type NoteCat } from "@/lib/children";
 import { getCentre } from "@/lib/demo";
 
 type Filter = "all" | "expected" | "in" | "out" | "absent";
@@ -31,7 +31,7 @@ function Roll({ centreId }: { centreId: string }) {
   const o = useOps();
   const now = useNow();
   const centre = getCentre(centreId)!;
-  const list = childrenOf(centreId);
+  const list = kidsOf(o, centreId);
   const [filter, setFilter] = useState<Filter>("all");
   const [q, setQ] = useState("");
   const c = counts(o, list);

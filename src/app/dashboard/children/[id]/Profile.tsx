@@ -4,16 +4,19 @@ import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/Icons";
 import { Alert, ChildAvatar, Flags, StatusPill } from "@/components/app/ChildBits";
-import { attOf, notesOf, ops, useNow, useOps } from "@/components/app/OpsStore";
+import { attOf, findKid, notesOf, ops, useNow, useOps, useReady } from "@/components/app/OpsStore";
 import { Card, Expiry, Pill } from "@/components/app/ui";
-import { ageText, getChild, NOTE_CATS, type Child, type NoteCat } from "@/lib/children";
+import { ageText, ALLERGY, NOTE_CATS, ROOMS, type Child, type Contact, type NoteCat } from "@/lib/children";
 import { centres } from "@/lib/demo";
 
 const TABS = ["Overview", "Health", "Behaviour", "Family", "Notes", "Consents"] as const;
 type Tab = (typeof TABS)[number];
 
 export function Profile({ id }: { id: string }) {
-  const child = getChild(id);
+  const o = useOps();
+  const ready = useReady();
+  const child = findKid(o, id);
+  if (!child && !ready) return <p className="text-ink-soft">Loading profile</p>;
   if (!child)
     return (
       <div className="space-y-4">
@@ -62,10 +65,20 @@ function Body({ child }: { child: Child }) {
             <Flags child={child} />
           </div>
         </div>
-        <span className="inline-flex items-center gap-2 rounded-full bg-tint px-4 py-2 text-sm font-semibold text-ink-soft">
-          <Icon name="lock" className="h-4 w-4" /> Restricted
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-2 rounded-full bg-tint px-4 py-2 text-sm font-semibold text-ink-soft">
+            <Icon name="lock" className="h-4 w-4" /> Restricted
+          </span>
+          <label className="sr-only" htmlFor="move-room">Move to room</label>
+          <select id="move-room" value={child.room} onChange={(e) => ops.editKid(child.id, { room: e.target.value })} className="rounded-full border border-line bg-bg px-4 py-2 text-sm font-semibold">
+            {ROOMS[child.centreId].map((r) => <option key={r.name}>{r.name}</option>)}
+          </select>
+          <button type="button" onClick={() => ops.editKid(child.id, { archived: !child.archived })} className="rounded-full border border-line px-4 py-2 text-sm font-semibold hover:bg-tint">
+            {child.archived ? "Restore child" : "Archive child"}
+          </button>
         </span>
       </div>
+      {child.archived && <Alert>This child is archived. They do not appear on the roll, kiosk or family updates.</Alert>}
 
       {(severe.length > 0 || child.restriction) && (
         <div className="space-y-2">
@@ -150,6 +163,7 @@ function Body({ child }: { child: Child }) {
               </ul>
             )}
           </Card>
+          <AddHealth child={child} />
           <div className="grid gap-6 lg:grid-cols-2">
             <Card title="Medical conditions">
               <ul className="divide-y divide-line px-5">
@@ -197,6 +211,7 @@ function Body({ child }: { child: Child }) {
               </ul>
             </Card>
           ))}
+          <AddBehaviour child={child} />
           <Card title="Comfort and support">
             <dl className="px-5">
               <Row k="Comfort" v={child.behaviour.comfort} />
@@ -225,6 +240,7 @@ function Body({ child }: { child: Child }) {
           <Card title="Parents and guardians">
             <ContactList list={child.guardians} />
           </Card>
+          <AddContact child={child} />
           <div className="grid gap-6 lg:grid-cols-2">
             <Card title="Authorised to collect">
               <ContactList list={child.authorised} />
@@ -244,7 +260,13 @@ function Body({ child }: { child: Child }) {
             {child.consents.map(([name, ok]) => (
               <li key={name} className="flex items-center gap-4 px-5 py-3.5">
                 <span className="min-w-0 flex-1 font-medium">{name}</span>
-                <Pill tone={ok ? "ok" : "owed"}>{ok ? "Given" : "Not given"}</Pill>
+                <button
+                  type="button"
+                  onClick={() => ops.editKid(child.id, { consents: child.consents.map(([n, v]) => (n === name ? [n, !v] : [n, v])) as Child["consents"] })}
+                  aria-label={`${name}: ${ok ? "given" : "not given"}. Click to change`}
+                >
+                  <Pill tone={ok ? "ok" : "owed"}>{ok ? "Given" : "Not given"}</Pill>
+                </button>
               </li>
             ))}
           </ul>
@@ -325,5 +347,91 @@ function NoteLog({ child }: { child: Child }) {
         </ul>
       </Card>
     </div>
+  );
+}
+
+const input = "w-full rounded-xl border border-ink/25 bg-bg px-3 py-2.5";
+
+function AddHealth({ child }: { child: Child }) {
+  const available = Object.entries(ALLERGY).filter(([, a]) => !child.allergies.some((x) => x.name === a.name));
+  const [key, setKey] = useState("");
+  const [med, setMed] = useState({ name: "", dose: "", when: "", days: "180" });
+  const [cond, setCond] = useState("");
+  return (
+    <Card title="Update health record">
+      <div className="grid gap-6 p-5 lg:grid-cols-3">
+        <div className="space-y-2">
+          <p className="text-sm font-semibold">Add an allergy</p>
+          <select value={key} onChange={(e) => setKey(e.target.value)} aria-label="Allergy" className={input}>
+            <option value="">Choose</option>
+            {available.map(([k, a]) => <option key={k} value={k}>{a.name} ({a.severity})</option>)}
+          </select>
+          <button type="button" disabled={!key} onClick={() => { ops.editKid(child.id, { allergies: [...child.allergies, ALLERGY[key]] }); setKey(""); }} className="rounded-full bg-ink px-5 py-2 text-sm font-semibold text-bg disabled:bg-tint disabled:text-ink-soft">Add allergy</button>
+        </div>
+        <div className="space-y-2">
+          <p className="text-sm font-semibold">Add a medical condition</p>
+          <input value={cond} onChange={(e) => setCond(e.target.value)} placeholder="Condition and plan" aria-label="Condition" className={input} />
+          <button type="button" disabled={!cond.trim()} onClick={() => { ops.editKid(child.id, { conditions: [...child.conditions, cond.trim()] }); setCond(""); }} className="rounded-full bg-ink px-5 py-2 text-sm font-semibold text-bg disabled:bg-tint disabled:text-ink-soft">Add condition</button>
+        </div>
+        <div className="space-y-2">
+          <p className="text-sm font-semibold">Add medication</p>
+          <input value={med.name} onChange={(e) => setMed({ ...med, name: e.target.value })} placeholder="Name" aria-label="Medication name" className={input} />
+          <input value={med.dose} onChange={(e) => setMed({ ...med, dose: e.target.value })} placeholder="Dose" aria-label="Dose" className={input} />
+          <input value={med.when} onChange={(e) => setMed({ ...med, when: e.target.value })} placeholder="When to give" aria-label="When to give" className={input} />
+          <input type="number" min={0} value={med.days} onChange={(e) => setMed({ ...med, days: e.target.value })} aria-label="Days until expiry" className={input} />
+          <p className="text-xs text-ink-soft">Days until expiry</p>
+          <button type="button" disabled={!med.name.trim()} onClick={() => { ops.editKid(child.id, { medications: [...child.medications, { name: med.name.trim(), dose: med.dose.trim() || "As directed", when: med.when.trim() || "As directed", expiresIn: Number(med.days) || 0 }] }); setMed({ name: "", dose: "", when: "", days: "180" }); }} className="rounded-full bg-ink px-5 py-2 text-sm font-semibold text-bg disabled:bg-tint disabled:text-ink-soft">Add medication</button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function AddBehaviour({ child }: { child: Child }) {
+  const [kind, setKind] = useState<"strengths" | "triggers" | "strategies">("strategies");
+  const [text, setText] = useState("");
+  return (
+    <Card title="Add to the behaviour profile" className="lg:col-span-2">
+      <div className="flex flex-wrap items-end gap-3 p-5">
+        <select value={kind} onChange={(e) => setKind(e.target.value as typeof kind)} aria-label="Section" className={`${input} sm:w-48`}>
+          <option value="strengths">Strength</option>
+          <option value="triggers">Trigger</option>
+          <option value="strategies">What helps</option>
+        </select>
+        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Write it in plain words" aria-label="Behaviour detail" className={`${input} min-w-48 flex-1`} />
+        <button type="button" disabled={!text.trim()} onClick={() => { ops.editKid(child.id, { behaviour: { ...child.behaviour, [kind]: [...child.behaviour[kind], text.trim()] } }); setText(""); }} className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-bg disabled:bg-tint disabled:text-ink-soft">Add</button>
+      </div>
+    </Card>
+  );
+}
+
+function AddContact({ child }: { child: Child }) {
+  const [v, setV] = useState({ name: "", relation: "", phone: "", collect: true, emergency: false });
+  return (
+    <Card title="Add a contact">
+      <div className="grid gap-3 p-5 sm:grid-cols-4">
+        <input value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} placeholder="Full name" aria-label="Contact name" className={input} />
+        <input value={v.relation} onChange={(e) => setV({ ...v, relation: e.target.value })} placeholder="Relationship" aria-label="Relationship" className={input} />
+        <input type="tel" value={v.phone} onChange={(e) => setV({ ...v, phone: e.target.value })} placeholder="Mobile" aria-label="Mobile" className={input} />
+        <button
+          type="button"
+          disabled={!v.name.trim() || !v.phone.trim()}
+          onClick={() => {
+            const c: Contact = { name: v.name.trim(), relation: v.relation.trim() || "Family friend", phone: v.phone.trim(), canCollect: v.collect };
+            ops.editKid(child.id, {
+              ...(v.collect ? { authorised: [...child.authorised, c] } : {}),
+              ...(v.emergency ? { emergency: [...child.emergency, c] } : {}),
+              ...(!v.collect && !v.emergency ? { emergency: [...child.emergency, c] } : {}),
+            });
+            setV({ name: "", relation: "", phone: "", collect: true, emergency: false });
+          }}
+          className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-bg disabled:bg-tint disabled:text-ink-soft"
+        >
+          Add contact
+        </button>
+        <label className="flex items-center gap-2 text-sm sm:col-span-2"><input type="checkbox" checked={v.collect} onChange={(e) => setV({ ...v, collect: e.target.checked })} /> Authorised to collect</label>
+        <label className="flex items-center gap-2 text-sm sm:col-span-2"><input type="checkbox" checked={v.emergency} onChange={(e) => setV({ ...v, emergency: e.target.checked })} /> Emergency contact</label>
+      </div>
+    </Card>
   );
 }

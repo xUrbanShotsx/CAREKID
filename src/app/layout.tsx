@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope, IBM_Plex_Mono } from "next/font/google";
 import { Motion } from "@/components/Motion";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
-import { SiteChrome } from "@/components/SiteChrome";
+import { Suspense } from "react";
 import {
   SITE_DESCRIPTION,
   SITE_NAME,
@@ -77,10 +75,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="flex min-h-full flex-col">
-        <Motion />
-        <SiteChrome nav={<Navbar />} footer={<Footer />}>
-          {children}
-        </SiteChrome>
+        <Suspense fallback={null}>
+          <Motion />
+        </Suspense>
+        {children}
       </body>
     </html>
   );

@@ -104,6 +104,8 @@ export type Child = {
   language: string;
   notes: Note[];
   today: Att;
+  /** Set when a child has left the centre. */
+  archived?: boolean;
 };
 
 /* ---------- rooms ---------- */
@@ -125,7 +127,7 @@ export const ROOMS: Record<string, Room[]> = {
 
 /* ---------- libraries ---------- */
 
-const ALLERGY: Record<string, Allergy> = {
+export const ALLERGY: Record<string, Allergy> = {
   peanut: {
     name: "Peanut",
     severity: "Anaphylaxis",
@@ -481,3 +483,72 @@ export function ageText(dob: string, now: Date): string {
 export const initials = (c: Child) => `${c.first[0]}${c.last[0]}`;
 
 export const severeAllergy = (c: Child) => c.allergies.find((a) => a.severity === "Anaphylaxis");
+
+/* ---------- creating a child from a form ---------- */
+
+export type NewChild = {
+  centreId: string;
+  first: string;
+  last: string;
+  dob: string;
+  room: string;
+  days: string[];
+  language?: string;
+  guardianName: string;
+  guardianRelation: string;
+  guardianPhone: string;
+  guardianEmail?: string;
+  secondGuardian?: string;
+  secondPhone?: string;
+  emergencyName: string;
+  emergencyPhone: string;
+  emergencyRelation: string;
+  allergies: string[];
+  condition?: string;
+  dietary?: string;
+  doctorName?: string;
+  doctorPhone?: string;
+  photoConsent: boolean;
+};
+
+export const ALL_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+
+export function makeChild(n: NewChild): Child {
+  const slug = `${n.centreId}-${n.first}-${n.last}`.toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const guardians: Contact[] = [
+    { name: n.guardianName, relation: n.guardianRelation, phone: n.guardianPhone, email: n.guardianEmail || undefined, canCollect: true, primary: true },
+  ];
+  if (n.secondGuardian?.trim())
+    guardians.push({ name: n.secondGuardian.trim(), relation: "Parent", phone: n.secondPhone ?? "", canCollect: true });
+  const emergency: Contact = { name: n.emergencyName, relation: n.emergencyRelation, phone: n.emergencyPhone, canCollect: false };
+  return {
+    id: `${slug}-${Date.now().toString(36)}`,
+    centreId: n.centreId,
+    first: n.first.trim(),
+    last: n.last.trim(),
+    dob: n.dob,
+    room: n.room,
+    days: n.days,
+    allergies: n.allergies.map((k) => ALLERGY[k]).filter(Boolean),
+    conditions: n.condition?.trim() ? [n.condition.trim()] : [],
+    medications: [],
+    dietary: n.dietary?.trim() || (n.allergies.length ? "Allergy-safe meals. Check the allergy register before serving." : "No restrictions"),
+    immunisation: "Statement requested from family",
+    doctor: { name: n.doctorName?.trim() || "Not provided", phone: n.doctorPhone?.trim() || "" },
+    behaviour: { strengths: [], triggers: [], strategies: [], comfort: "Not recorded yet" },
+    guardians,
+    authorised: [...guardians],
+    emergency: [emergency],
+    consents: [
+      ["Photos and video for learning records", n.photoConsent],
+      ["Social media and newsletter use", false],
+      ["Sunscreen application", true],
+      ["Excursions and walks", false],
+      ["Emergency medical treatment and ambulance", true],
+      ["Digital device use for learning", false],
+    ],
+    language: n.language?.trim() || "English",
+    notes: [],
+    today: { status: "expected" },
+  };
+}

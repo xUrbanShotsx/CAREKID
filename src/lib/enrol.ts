@@ -15,6 +15,10 @@ export type Enquiry = {
   stage: (typeof STAGES)[number];
   form: number;
   note?: string;
+  /** Set once the enquiry has been enrolled as a child. */
+  childId?: string;
+  phone?: string;
+  email?: string;
 };
 
 export const enquiries: Enquiry[] = [

@@ -4,15 +4,14 @@ import { Icon } from "@/components/Icons";
 import { useCentre } from "@/components/app/CentreContext";
 import { PickCentre } from "@/components/app/PickCentre";
 import { ChildAvatar, StatusPill } from "@/components/app/ChildBits";
-import { attOf, notesOf, ops, useOps } from "@/components/app/OpsStore";
+import { attOf, kidsOf, notesOf, ops, useOps } from "@/components/app/OpsStore";
 import { Card, PageHead, Pill, Stat } from "@/components/app/ui";
-import { childrenOf } from "@/lib/children";
 
 export function View() {
   const { centre } = useCentre();
   const o = useOps();
   if (!centre) return <PickCentre title="Family updates" what="Family updates" />;
-  const list = childrenOf(centre.id).filter((k) => attOf(o, k).status !== "absent");
+  const list = kidsOf(o, centre.id).filter((k) => attOf(o, k).status !== "absent");
   const ready = list.filter((k) => notesOf(o, k).some((n) => n.share) && !o.sent[k.id]);
 
   return (

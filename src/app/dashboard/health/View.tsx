@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useCentre } from "@/components/app/CentreContext";
 import { Card, Expiry, PageHead, Pill, Stat } from "@/components/app/ui";
-import { children, childrenOf } from "@/lib/children";
+import { kidsOf, useOps } from "@/components/app/OpsStore";
 import { centres } from "@/lib/demo";
 
 export function View() {
   const { centre } = useCentre();
-  const list = centre ? childrenOf(centre.id) : children;
+  const o = useOps();
+  const list = kidsOf(o, centre?.id);
   const name = (id: string) => centres.find((c) => c.id === id)?.name;
   const withAllergy = list.filter((k) => k.allergies.length);
   const meds = list
