@@ -4,10 +4,13 @@ import Link from "next/link";
 import { Icon } from "@/components/Icons";
 import { useCentre } from "@/components/app/CentreContext";
 import { Card, PageHead, Pill, Stat } from "@/components/app/ui";
+import { attOf, counts, useOps } from "@/components/app/OpsStore";
+import { childrenOf } from "@/lib/children";
 import { centres, me } from "@/lib/demo";
 
 export function OverviewView() {
   const { centre, setCentre } = useCentre();
+  const o = useOps();
   const first = me.name.split(" ")[0];
 
   if (!centre) {
@@ -63,6 +66,11 @@ export function OverviewView() {
     );
   }
 
+  const kids = childrenOf(centre.id);
+  const here = counts(o, kids);
+  const severeIn = kids.filter(
+    (k) => attOf(o, k).status === "in" && k.allergies.some((a) => a.severity === "Anaphylaxis"),
+  ).length;
   const open = centre.incidents.filter((i) => i.status !== "Closed").length;
   const expiring = centre.staff.filter((s) =>
     [s.wwcc, s.firstAid, s.childProtection].some((d) => d <= 30),
@@ -132,8 +140,9 @@ export function OverviewView() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
+          ["/dashboard/attendance", "Attendance", `${here.in} in, ${here.expected} still to arrive${severeIn ? `, ${severeIn} with anaphylaxis risk` : ""}`, "clock"],
           ["/dashboard/daily", "Daily checks", centre.tiles[0].value + " done today", "check"],
           ["/dashboard/staff", "Staff credentials", `${expiring} expiring or expired`, "users"],
           ["/dashboard/incidents", "Incidents", `${open} open`, "alert"],

@@ -28,6 +28,70 @@ export const modules: Module[] = [
     ],
   },
   {
+    id: "children",
+    name: "Children & Attendance",
+    blurb: "A live roll, a profile for every child and a note beside each name.",
+    features: [
+      "Daily attendance roll by room",
+      "Educator and parent sign-in and sign-out",
+      "Parent kiosk with PIN",
+      "Live educator-to-child ratio checks",
+      "Authorised collector checks at pick-up",
+      "Release restriction and court order alerts",
+      "Absence recording with reasons",
+      "Notes beside each child, by category",
+      "Child profiles for behaviour and wellbeing",
+      "Parent, guardian and emergency contacts",
+      "Consent and permission records",
+      "QR-code room sign-in sheets",
+    ],
+  },
+  {
+    id: "health",
+    name: "Health & Allergies",
+    blurb: "Every allergy, condition and medication, where the room can see it.",
+    features: [
+      "Allergy and anaphylaxis register",
+      "Severity flags on the roll and in every room",
+      "Medical condition and action plan records",
+      "Medication held on site with expiry alerts",
+      "Dietary requirements for the kitchen",
+      "Immunisation record tracking",
+      "Printable allergy list for each room",
+      "Doctor and emergency treatment details",
+    ],
+  },
+  {
+    id: "families",
+    name: "Family Communication",
+    blurb: "One clear update per child at the end of the day, from the notes you already wrote.",
+    features: [
+      "Daily family updates built from staff notes",
+      "Staff-only notes kept out of updates",
+      "Routine logging for meals, sleep, toileting and sunscreen",
+      "Absence and late arrival notices",
+      "Incident notifications to families",
+      "Policy and consent requests",
+      "Free family access",
+      "Message and send history",
+    ],
+  },
+  {
+    id: "enrol",
+    name: "Enrolment & Waitlist",
+    blurb: "From first enquiry to an enrolled child, ranked by your own rules.",
+    features: [
+      "Enquiry and waitlist register",
+      "Priority scoring from your own rules",
+      "Tour booking and reminders",
+      "Online enrolment forms",
+      "Offer and acceptance tracking",
+      "Child and family profiles created on enrolment",
+      "Occupancy and demand reporting",
+      "Enquiry source reporting",
+    ],
+  },
+  {
     id: "daily",
     name: "Daily Centre Operations",
     blurb: "The checks that happen every day, done on a phone in the room.",
@@ -310,6 +374,7 @@ export const plans = [
     note: "per centre, per month",
     blurb: "For an independent centre that wants the daily work and the records in one place.",
     items: [
+      "Attendance, child profiles and health register",
       "Dashboard and role-based permissions",
       "Custom daily and recurring checklists",
       "Staff qualification and expiry monitoring",
@@ -348,10 +413,27 @@ export const plans = [
   },
 ];
 
+export const compare: { row: string; carekid: string; typical: string }[] = [
+  { row: "Daily attendance and sign-in", carekid: "Core", typical: "Core" },
+  { row: "Parent kiosk and family updates", carekid: "Core", typical: "Core" },
+  { row: "Child profiles with behaviour and consents", carekid: "Core", typical: "Varies" },
+  { row: "Live educator-to-child ratio check", carekid: "Core", typical: "Varies" },
+  { row: "Allergy and medication register with expiry alerts", carekid: "Core", typical: "Basic medical details" },
+  { row: "Release restriction alert at pick-up", carekid: "Core", typical: "Varies" },
+  { row: "Staff credential register with expiry alerts", carekid: "Core", typical: "Rarely a focus" },
+  { row: "Policy library with read-and-acknowledge", carekid: "Core", typical: "Rarely a focus" },
+  { row: "NQS Quality Area evidence and QIP", carekid: "Core", typical: "Rarely a focus" },
+  { row: "AI document auditor with cited sources", carekid: "Core", typical: "Rarely a focus" },
+  { row: "Required, good practice and centre rules kept apart", carekid: "Core", typical: "Rarely a focus" },
+  { row: "Incident to corrective action to audit pack", carekid: "Core", typical: "Incident forms" },
+  { row: "Compliance command centre across centres", carekid: "Core", typical: "Occupancy reporting" },
+  { row: "CCS submissions, invoicing and payments", carekid: "Use your billing system", typical: "Core" },
+];
+
 export const faqs: [string, string][] = [
   [
     "Does CareKid replace my childcare management system?",
-    "No. CareKid does not do childcare subsidy billing, enrolments, parent messaging or full rostering. Keep your existing system for those. CareKid covers the compliance and operating records around them.",
+    "Not for billing. CareKid covers attendance, child profiles, family updates, enrolment and everything compliance, but it does not do childcare subsidy billing, invoicing or full rostering. Keep your billing system for those and run CareKid beside it, or use it alone if you bill elsewhere.",
   ],
   [
     "Does CareKid tell me whether we are compliant?",

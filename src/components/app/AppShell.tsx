@@ -12,6 +12,11 @@ import { Avatar } from "./ui";
 
 const NAV: { href: string; label: string; icon: IconName }[] = [
   { href: "/dashboard", label: "Dashboard", icon: "grid" },
+  { href: "/dashboard/attendance", label: "Attendance", icon: "clock" },
+  { href: "/dashboard/children", label: "Children", icon: "user" },
+  { href: "/dashboard/health", label: "Health register", icon: "heart" },
+  { href: "/dashboard/updates", label: "Family updates", icon: "send" },
+  { href: "/dashboard/enrolments", label: "Enrolments", icon: "list" },
   { href: "/dashboard/daily", label: "Daily checks", icon: "check" },
   { href: "/dashboard/staff", label: "Staff", icon: "users" },
   { href: "/dashboard/policies", label: "Policies", icon: "file" },

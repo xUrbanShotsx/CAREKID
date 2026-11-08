@@ -103,6 +103,9 @@ const paths: Record<string, ReactNode> = {
   arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   close: <path d="M6 6l12 12M18 6L6 18" />,
+  heart: <path d="M12 20s-7-4.500-7-10a4 4 0 017-2.500A4 4 0 0119 10c0 5.500-7 10-7 10z" />,
+  pill: <path d="M10.500 20.500a4.500 4.500 0 01-6.400-6.400l9.900-9.900a4.500 4.500 0 016.400 6.400l-9.900 9.900zM8.500 8.500l7 7" />,
+  send: <path d="M21 3L3 10.500l7 2.500 2.500 7L21 3zM10 13l11-10" />,
   alert: <path d="M12 4l9 16H3L12 4zM12 10v4M12 17h.01" />,
   qr: (
     <>

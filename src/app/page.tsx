@@ -14,6 +14,7 @@ import { ModuleExplorer } from "@/components/ModuleExplorer";
 import { FaqList } from "@/components/Faq";
 import { Icon } from "@/components/Icons";
 import {
+  compare,
   differentiators,
   faqs,
   featureCount,
@@ -203,15 +204,16 @@ export default function Home() {
       <section className="mx-auto mt-28 grid max-w-6xl grid-cols-[minmax(0,1fr)] items-center gap-14 px-5 sm:px-8 lg:grid-cols-[0.8fr_1.2fr]">
         <div data-reveal className="lg:order-2">
           <Eyebrow>On the floor</Eyebrow>
-          <H2>Educators tick it off in the room, on a phone.</H2>
+          <H2>Attendance, notes and checks, done in the room on a phone.</H2>
           <p className="mt-6 max-w-lg text-ink-soft">
-            Scan the QR code on the door, work down the checks, add a photo if
-            something is wrong and submit. Opening and closing checklists,
+            Sign children in, write a note beside a name and tick off the
+            checks without leaving the room. Opening and closing checklists,
             playground and sleep checks, cleaning and food safety records all
             work the same way, and each one is stamped with who and when.
           </p>
           <ul className="mt-7 space-y-3">
             {[
+              "Live roll with ratio checks and a note beside each child",
               "QR-code room inspection forms",
               "Custom checklists you build yourself",
               "A missed check shows up the same day",
@@ -285,6 +287,45 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* comparison */}
+      <section className="mx-auto mt-28 max-w-6xl px-5 sm:px-8">
+        <div data-reveal>
+          <Eyebrow>How it compares</Eyebrow>
+          <H2 className="max-w-3xl">The daily work of a childcare system, plus the compliance layer most of them skip.</H2>
+          <p className="mt-5 max-w-xl text-ink-soft">
+            Most childcare management software is built around bookings, billing and the parent app. CareKid does the daily operations too, then goes further on compliance. For subsidy billing, it sits beside the system you already use.
+          </p>
+        </div>
+        <div data-reveal className="mt-10 overflow-x-auto rounded-3xl border border-line">
+          <table className="w-full min-w-[640px] text-left">
+            <thead>
+              <tr className="border-b border-line bg-tint font-mono text-xs uppercase tracking-widest">
+                <th className="px-5 py-4 font-normal">Capability</th>
+                <th className="px-5 py-4 font-normal">CareKid</th>
+                <th className="px-5 py-4 font-normal text-ink-soft">Typical childcare management software</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line">
+              {compare.map((c) => (
+                <tr key={c.row}>
+                  <td className="px-5 py-3.5 font-medium">{c.row}</td>
+                  <td className="px-5 py-3.5">
+                    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${c.carekid === "Core" ? "bg-accent" : "bg-tint"}`}>
+                      {c.carekid === "Core" && <Icon name="check" className="h-3.5 w-3.5" />}
+                      {c.carekid}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-ink-soft">{c.typical}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-4 text-sm text-ink-soft">
+          Based on the features published on the websites of leading Australian childcare management products. Features vary by product and plan.
+        </p>
       </section>
 
       {/* regulation: dark */}
