@@ -37,7 +37,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex h-full min-h-0 flex-col">
       <Link
         href="/dashboard"
-        className="flex h-16 shrink-0 items-center px-5 text-[0.7rem]"
+        className="flex h-16 shrink-0 items-center px-5 text-[0.8rem]"
         onClick={() => setOpen(false)}
         aria-label="CareKid dashboard"
       >

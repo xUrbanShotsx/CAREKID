@@ -17,7 +17,7 @@ export function Footer() {
       <div className="mx-auto max-w-6xl px-5 pt-16 sm:px-8">
         <div className="flex flex-col justify-between gap-10 md:flex-row">
           <div>
-            <Logo light className="text-[1rem]" />
+            <Logo className="text-[1rem]" />
             <p className="mt-6 max-w-sm font-display text-2xl font-semibold leading-snug">
               The compliance and operations hub for Australian childcare
               centres.
