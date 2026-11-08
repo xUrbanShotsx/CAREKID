@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CentreProvider } from "@/components/app/CentreContext";
 import { AppShell } from "@/components/app/AppShell";
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return <AppShell>{children}</AppShell>;
+  return (
+    <CentreProvider>
+      <AppShell>{children}</AppShell>
+    </CentreProvider>
+  );
 }

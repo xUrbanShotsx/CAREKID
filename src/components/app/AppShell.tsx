@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
-import { centre, me } from "@/lib/demo";
+import { centres, me } from "@/lib/demo";
 import { Icon, type IconName } from "../Icons";
 import { Logo } from "../Logo";
+import { useCentre } from "./CentreContext";
+import { CentreSwitcher } from "./CentreSwitcher";
 import { Avatar } from "./ui";
 
 const NAV: { href: string; label: string; icon: IconName }[] = [
@@ -21,6 +23,7 @@ const NAV: { href: string; label: string; icon: IconName }[] = [
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { centre } = useCentre();
   const current = NAV.find((n) =>
     n.href === "/dashboard" ? pathname === n.href : pathname.startsWith(n.href),
   );
@@ -37,9 +40,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       </Link>
 
       <div className="mx-3 shrink-0 rounded-xl border border-line bg-surface px-3 py-2.5">
-        <p className="truncate text-sm font-bold">{centre.name}</p>
+        <p className="truncate text-sm font-bold">{centre?.name ?? "All centres"}</p>
         <p className="text-xs text-ink-soft">
-          {centre.type} · {centre.state}
+          {centre ? `${centre.type} · ${centre.state}` : `${centres.length} centres in the group`}
         </p>
       </div>
 
@@ -115,9 +118,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             <Icon name="menu" className="h-6 w-6" />
           </button>
-          <p className="font-display text-base font-extrabold tracking-tight lg:hidden">
-            {current?.label ?? "Dashboard"}
-          </p>
+          <CentreSwitcher />
           <label className="hidden max-w-sm flex-1 items-center gap-2 rounded-full bg-tint px-4 py-2 text-sm text-ink-soft focus-within:ring-2 focus-within:ring-accent sm:flex">
             <Icon name="search" className="h-4 w-4" />
             <input

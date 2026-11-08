@@ -3,11 +3,20 @@
 import { useState } from "react";
 import { Icon } from "@/components/Icons";
 import { Card, PageHead, Pill, Progress } from "@/components/app/ui";
-import { checklists } from "@/lib/demo";
+import { useCentre } from "@/components/app/CentreContext";
+import { PickCentre } from "@/components/app/PickCentre";
+import { checklists, type Centre } from "@/lib/demo";
 
-export function DailyChecks() {
+export function View() {
+  const { centre } = useCentre();
+  if (!centre) return <PickCentre title="Daily checks" what="Daily checks" />;
+  return <Checks key={centre.id} centre={centre} />;
+}
+
+function Checks({ centre }: { centre: Centre }) {
+  const lists = checklists.filter((c) => c.id in centre.lists);
   const [done, setDone] = useState<Record<string, string[]>>(
-    Object.fromEntries(checklists.map((c) => [c.id, c.done])),
+    Object.fromEntries(lists.map((c) => [c.id, c.checks.slice(0, centre.lists[c.id]).map((k) => k.id)])),
   );
   const [signed, setSigned] = useState<Record<string, string>>({});
 
@@ -17,18 +26,18 @@ export function DailyChecks() {
       [list]: d[list].includes(id) ? d[list].filter((x) => x !== id) : [...d[list], id],
     }));
 
-  const total = checklists.reduce((n, c) => n + c.checks.length, 0);
+  const total = lists.reduce((n, c) => n + c.checks.length, 0);
   const complete = Object.values(done).reduce((n, l) => n + l.length, 0);
 
   return (
     <div className="space-y-6">
       <PageHead
         title="Daily checks"
-        sub="Tick the checks as they are done. Each submitted checklist is stamped with who and when."
+        sub={`${centre.name}. Tick the checks as they are done. Each submitted checklist is stamped with who and when.`}
         right={<Pill tone="neutral">{complete} of {total} checks done</Pill>}
       />
       <div className="grid gap-6 md:grid-cols-2">
-        {checklists.map((c) => {
+        {lists.map((c) => {
           const d = done[c.id];
           const pct = Math.round((d.length / c.checks.length) * 100);
           const all = d.length === c.checks.length;
